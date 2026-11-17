@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Lab | المحطة 3: مولد البرومبت</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<style>
+html,body{margin:0;min-height:100vh;background:#0a1128}
+body{background:linear-gradient(180deg,#0a1128 0%,#0f1d40 50%,#1e3a8a 100%)}
+#pg{max-width:800px;margin:20px auto 40px;padding:20px 16px;color:#fff;direction:rtl;font-family:'Segoe UI',Tahoma,sans-serif;line-height:1.8}
+#pg h2{font-size:32px;margin:0 0 4px;text-align:center}.sub{color:#7dd3fc;text-align:center;margin-bottom:18px}
+.lbl{font-weight:bold;color:#93c5fd;margin:14px 0 6px}
+.types{display:flex;flex-wrap:wrap;gap:8px}
+.types button{background:#1e2a55;color:#fff;border:1px solid #6d28d9;border-radius:20px;padding:6px 14px;cursor:pointer;font-family:inherit;font-size:14px}
+.types button.sel{background:#6d28d9;border-color:#fcd34d}
+textarea,select{width:100%;box-sizing:border-box;padding:12px;border-radius:10px;border:1px solid #3b82f6;background:#0f1d40;color:#fff;font-size:16px;font-family:inherit}
+#go{width:100%;margin-top:12px;padding:14px;border:none;border-radius:12px;background:#8b5cf6;color:#fff;font-size:18px;font-weight:bold;cursor:pointer;font-family:inherit}
+#go:disabled{opacity:.4;cursor:not-allowed}
+#out{background:#16224a;border-radius:12px;padding:14px;white-space:pre-wrap;margin-top:14px;min-height:60px;border-right:3px solid #00d9ff}
+#out.err{background:#4a1d2b;color:#ffb3c1}
+.row[hidden]{display:none}.row{display:flex;gap:10px;margin-top:10px}.row button{flex:1;padding:10px;border:none;border-radius:10px;background:#059669;color:#fff;cursor:pointer;font-family:inherit;font-size:15px}
+.tip{background:#16224a;border-radius:10px;padding:10px 14px;margin-top:20px;font-size:14px}
+</style>
+</head>
+<body>
+<section id="pg">
+  <h2>محطة: مولد البرومبت</h2>
+  <p class="sub">اكتب فكرتك بسيطة، ونوفا تحوّلها لبرومبت احترافي تديه لأي ذكاء اصطناعي.</p>
+
+  <div class="lbl">1) نوع المهمة</div>
+  <div class="types" id="types">
+    <button class="sel" data-t="تصميم صورة">🎨 تصميم صورة</button>
+    <button data-t="إنشاء فيديو تعليمي">🎬 فيديو</button>
+    <button data-t="بحث علمي">📚 بحث</button>
+    <button data-t="شرح درس">🧠 شرح درس</button>
+    <button data-t="عرض تقديمي">📊 عرض تقديمي</button>
+    <button data-t="اختبار وأسئلة">📝 اختبار</button>
+    <button data-t="كتابة كود">💻 كود</button>
+  </div>
+
+  <div class="lbl">2) فكرتك بكلامك العادي</div>
+  <textarea id="idea" rows="3" maxlength="400" placeholder="مثال: عايز شرح للشبكات لطلاب أولى ثانوي"></textarea>
+  <button id="go">⚡ ولّد البرومبت</button>
+
+  <div id="out" hidden></div>
+  <div class="row" id="acts" hidden><button id="copy">📋 انسخ البرومبت</button></div>
+
+  <div class="tip"><b>ليه البرومبت ده أحسن؟</b> لأنه بيحدد الدور والهدف والجمهور وشكل الإخراج والقيود، وده اللي بيخلي الذكاء الاصطناعي يفهم المطلوب بالظبط.</div>
+</section>
+
+<script src="./js/nav.js"></script>
+<script src="./js/nova-brain.js"></script>
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i);};
+  var type="تصميم صورة",busy=false;
+  var SYS="أنت خبير هندسة برومبتات للتعليم الإلكتروني. حوّل فكرة الطالب إلى برومبت احترافي جاهز للنسخ والاستخدام مع أي ذكاء اصطناعي. اكتب البرومبت بالعربية (وإذا كان نوعه تصميم صورة أو فيديو فأضف وصفاً بصرياً تفصيلياً). التزم بهذا الهيكل بأسطر قصيرة: الدور، الهدف، الجمهور، التفاصيل المطلوبة، الأسلوب والنبرة، شكل المخرجات، القيود. لا تكتب مقدمة ولا شرحاً خارج البرومبت. لا تزيد عن 180 كلمة.";
+  document.querySelectorAll("#types button").forEach(function(b){
+    b.onclick=function(){document.querySelectorAll("#types button").forEach(function(x){x.classList.remove("sel");});b.classList.add("sel");type=b.getAttribute("data-t");};
+  });
+  $("go").onclick=async function(){
+    var idea=$("idea").value.trim();
+    if(!idea||busy){$("idea").focus();return;}
+    busy=true;$("go").disabled=true;$("acts").hidden=true;
+    var o=$("out");o.hidden=false;o.className="";o.textContent="نوفا بتكتب البرومبت...";
+    try{
+      var t=await NovaBrain.generate(SYS,"نوع المهمة: "+type+"\nفكرة الطالب: "+idea,450,function(x){o.textContent=NovaBrain.clean(x);});
+      o.textContent=NovaBrain.clean(t).trim();$("acts").hidden=false;
+    }catch(e){o.className="err";o.textContent=NovaBrain.friendly(e);}
+    busy=false;$("go").disabled=false;
+  };
+  $("copy").onclick=function(){
+    var t=$("out").textContent;
+    (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){$("copy").textContent="✅ اتنسخ";},function(){var r=document.createRange();r.selectNodeContents($("out"));var s=getSelection();s.removeAllRanges();s.addRange(r);$("copy").textContent="حدّدته، اضغط Ctrl+C";});
+  };
+})();
+</script>
+</body>
+</html>
