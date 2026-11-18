@@ -44,8 +44,7 @@ textarea,select{width:100%;box-sizing:border-box;padding:12px;border-radius:10px
   <button id="go">⚡ ولّد البرومبت</button>
 
   <div id="out" hidden></div>
-  <div class="row" id="acts" hidden><button id="copy">📋 انسخ البرومبت</button></div>
-
+  <div class="row" id="acts" hidden><button id="copy">📋 انسخ البرومبت</button><button id="gpt">🚀 افتح ChatGPT</button></div>
   <div class="tip"><b>ليه البرومبت ده أحسن؟</b> لأنه بيحدد الدور والهدف والجمهور وشكل الإخراج والقيود، وده اللي بيخلي الذكاء الاصطناعي يفهم المطلوب بالظبط.</div>
 </section>
 
@@ -71,9 +70,11 @@ textarea,select{width:100%;box-sizing:border-box;padding:12px;border-radius:10px
     busy=false;$("go").disabled=false;
   };
   $("copy").onclick=function(){
+    $("gpt").onclick=function(){var t=$("out").textContent;try{navigator.clipboard.writeText(t);}catch(e){}window.open("https://chatgpt.com/","_blank");$("gpt").textContent="✅ اتنسخ، الصقه في ChatGPT";};
     var t=$("out").textContent;
     (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){$("copy").textContent="✅ اتنسخ";},function(){var r=document.createRange();r.selectNodeContents($("out"));var s=getSelection();s.removeAllRanges();s.addRange(r);$("copy").textContent="حدّدته، اضغط Ctrl+C";});
   };
+  
 })();
 </script>
 </body>
