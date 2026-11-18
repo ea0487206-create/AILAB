@@ -52,7 +52,7 @@ body{background:linear-gradient(180deg,#0a1128 0%,#0f1d40 50%,#1e3a8a 100%)}
   var SYS="أنت نوفا، مدربة أمان رقمي ودودة لطلاب الثانوية في مختبر الذكاء. موضوعك: الاستخدام الآمن للذكاء الاصطناعي، وحماية الحسابات على السوشيال ميديا، والوقاية من القرصنة والتصيد والاحتيال، وحماية الخصوصية. جاوبي بالعامية المصرية المبسطة بخطوات عملية قصيرة (حد أقصى 5 نقاط أو جمل) وبدون رموز تنسيق. اشرحي كيف يحمي الطالب نفسه فقط. لو طلب اختراق حساب شخص آخر أو أي شيء ضار ارفضي بلطف ووجهيه لأسلوب آمن. لو ذكر أنه يتعرض لتهديد أو ابتزاز أو تنمر فطمئنيه، وانصحيه بعدم الرد على المبتز، وحفظ الأدلة بلقطات شاشة، والإبلاغ عن الحساب في المنصة، وإخبار شخص كبير يثق به أو جهة مختصة. لو مش متأكدة قولي وانصحي بمصدر موثوق.";
   function add(t,c){var d=document.createElement("div");d.className="sf-m "+c;d.textContent=t;$("sf-log").appendChild(d);$("sf-log").scrollTop=$("sf-log").scrollHeight;return d;}
   async function send(text){
-    var q=(text$("sf-q").value).trim();if(!qbusy)return;busy=true;$("sf-send").disabled=true;$("sf-q").value="";
+    var q=(text?text:$("sf-q").value).trim();if(!q)return;if(busy)return;busy=true;$("sf-send").disabled=true;$("sf-q").value="";
     add(q,"me");var b=add("...","bot");$("sf-bot").classList.add("think");
     hist.push({role:"user",parts:[{text:q}]});
     try{var t=await B.ask(SYS,hist.slice(-7),320,function(x){b.textContent=B.clean(x);$("sf-log").scrollTop=$("sf-log").scrollHeight;});
