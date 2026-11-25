@@ -232,38 +232,28 @@
 })();
 (function () {
   var PHRASE = "متخصصة في الحاسب الآلي فقط";
-  window.__novaRefused = false;
+  var STATUS = "لسه محتاجة تأكيد";
+  var BTN = "تأكد من الإجابة";
 
   function apply() {
+    var statusEls = [];
+    document.querySelectorAll("div, span, small, p").forEach(function (e) {
+      if (e.children.length === 0 && e.textContent.indexOf(STATUS) !== -1) statusEls.push(e);
+    });
+    if (!statusEls.length) return;
+
+    var last = statusEls[statusEls.length - 1];
+    var bubble = last.parentElement;
+    var refused = bubble && bubble.textContent.indexOf(PHRASE) !== -1;
+
     document.querySelectorAll("button, a").forEach(function (b) {
-      if (b.textContent.indexOf("تأكد من الإجابة") !== -1) {
-        b.style.display = window.__novaRefused ? "none" : "";
-      }
+      if (b.textContent.indexOf(BTN) !== -1) b.style.display = refused ? "none" : "";
     });
-    document.querySelectorAll("div, span, small").forEach(function (e) {
-      if (e.children.length === 0 && e.textContent.indexOf("لسه محتاجة تأكيد") !== -1) {
-        e.style.display = window.__novaRefused ? "none" : "";
-      }
-    });
+    if (refused) last.style.display = "none";
   }
 
-  function hook() {
-    if (!window.AI || !window.AI.ask || window.AI.__hooked) return false;
-    var orig = window.AI.ask;
-    window.AI.ask = async function () {
-      var text = await orig.apply(this, arguments);
-      window.__novaRefused = String(text || "").indexOf(PHRASE) !== -1;
-      setTimeout(apply, 50);
-      return text;
-    };
-    window.AI.__hooked = true;
-    return true;
-  }
-
-  var tries = 0;
-  var t = setInterval(function () {
-    if (hook() || ++tries > 50) clearInterval(t);
-  }, 100);
-
-  new MutationObserver(apply).observe(document.documentElement, { childList: true, subtree: true });
+  new MutationObserver(apply).observe(document.documentElement, {
+    childList: true, subtree: true, characterData: true
+  });
+  setInterval(apply, 500);
 })();
