@@ -230,3 +230,40 @@
     setLast: setLast, getLast: getLast, friendly: friendly, cancel: cancel, clean: clean
   };
 })();
+(function () {
+  var PHRASE = "متخصصة في الحاسب الآلي فقط";
+  window.__novaRefused = false;
+
+  function apply() {
+    document.querySelectorAll("button, a").forEach(function (b) {
+      if (b.textContent.indexOf("تأكد من الإجابة") !== -1) {
+        b.style.display = window.__novaRefused ? "none" : "";
+      }
+    });
+    document.querySelectorAll("div, span, small").forEach(function (e) {
+      if (e.children.length === 0 && e.textContent.indexOf("لسه محتاجة تأكيد") !== -1) {
+        e.style.display = window.__novaRefused ? "none" : "";
+      }
+    });
+  }
+
+  function hook() {
+    if (!window.AI || !window.AI.ask || window.AI.__hooked) return false;
+    var orig = window.AI.ask;
+    window.AI.ask = async function () {
+      var text = await orig.apply(this, arguments);
+      window.__novaRefused = String(text || "").indexOf(PHRASE) !== -1;
+      setTimeout(apply, 50);
+      return text;
+    };
+    window.AI.__hooked = true;
+    return true;
+  }
+
+  var tries = 0;
+  var t = setInterval(function () {
+    if (hook() || ++tries > 50) clearInterval(t);
+  }, 100);
+
+  new MutationObserver(apply).observe(document.documentElement, { childList: true, subtree: true });
+})();
